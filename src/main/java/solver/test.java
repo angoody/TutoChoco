@@ -1,4 +1,4 @@
-package tuto;
+package solver;
 
 import jdk.nashorn.internal.objects.NativeArray;
 import models.*;
