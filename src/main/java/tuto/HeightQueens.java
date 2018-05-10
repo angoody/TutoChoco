@@ -1,3 +1,5 @@
+package tuto;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
@@ -6,9 +8,7 @@ import org.chocosolver.solver.variables.IntVar;
 
 import java.util.stream.IntStream;
 
-
-public class test {
-
+public class HeightQueens {
     public static void main (String[] args){
         int n = 8;
         Model model = new Model(n + "-queens problem");
@@ -28,5 +28,4 @@ public class test {
             System.out.println(solution.toString());
         }
     }
-
 }

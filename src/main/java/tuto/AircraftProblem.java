@@ -1,3 +1,5 @@
+package tuto;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
-public class aircraftProblem {
+public class AircraftProblem {
 
 
 
