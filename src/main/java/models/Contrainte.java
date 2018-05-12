@@ -1,23 +1,24 @@
 package models;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 public class Contrainte implements Serializable {
-    private Set<Integer> idLieux;
+    private List<Integer> idLieux;
     private Integer nbHeureAnnuel;
     private Integer dureeMaxFormation;
     private Integer maxSemaineFormation;
-    private Set<Periode> periodeFormationExclusion;
-    private Set<Periode> periodeFormationInclusion;
+    private List<Periode> periodeFormationExclusion;
+    private List<Periode> periodeFormationInclusion;
     private Integer maxStagiaireEntrepriseEnFormation;
-    private Set<Stagiaire> stagiairesEntreprise;
-    private Set<Stagiaire> stagiairesRecquis;
+    private List<Stagiaire> stagiairesEntreprise;
+    private List<Stagiaire> stagiairesRecquis;
 
     public Contrainte() {
     }
 
-    public Contrainte(Set<Integer> idLieux, Integer nbHeureAnnuel, Integer dureeMaxFormation, Integer maxSemaineFormation, Set<Periode> periodeFormationExclusion, Set<Periode> periodeFormationInclusion, Integer maxStagiaireEntrepriseEnFormation, Set<Stagiaire> stagiairesEntreprise, Set<Stagiaire> stagiairesRecquis) {
+    public Contrainte(List<Integer> idLieux, Integer nbHeureAnnuel, Integer dureeMaxFormation, Integer maxSemaineFormation, List<Periode> periodeFormationExclusion, List<Periode> periodeFormationInclusion, Integer maxStagiaireEntrepriseEnFormation, List<Stagiaire> stagiairesEntreprise, List<Stagiaire> stagiairesRecquis) {
         this.idLieux = idLieux;
         this.nbHeureAnnuel = nbHeureAnnuel;
         this.dureeMaxFormation = dureeMaxFormation;
@@ -29,11 +30,11 @@ public class Contrainte implements Serializable {
         this.stagiairesRecquis = stagiairesRecquis;
     }
 
-    public Set<Integer> getIdLieux() {
+    public List<Integer> getIdLieux() {
         return idLieux;
     }
 
-    public void setIdLieux(Set<Integer> idLieux) {
+    public void setIdLieux(List<Integer> idLieux) {
         this.idLieux = idLieux;
     }
 
@@ -61,19 +62,19 @@ public class Contrainte implements Serializable {
         this.maxSemaineFormation = maxSemaineFormation;
     }
 
-    public Set<Periode> getPeriodeFormationExclusion() {
+    public List<Periode> getPeriodeFormationExclusion() {
         return periodeFormationExclusion;
     }
 
-    public void setPeriodeFormationExclusion(Set<Periode> periodeFormationExclusion) {
+    public void setPeriodeFormationExclusion(List<Periode> periodeFormationExclusion) {
         this.periodeFormationExclusion = periodeFormationExclusion;
     }
 
-    public Set<Periode> getPeriodeFormationInclusion() {
+    public List<Periode> getPeriodeFormationInclusion() {
         return periodeFormationInclusion;
     }
 
-    public void setPeriodeFormationInclusion(Set<Periode> periodeFormationInclusion) {
+    public void setPeriodeFormationInclusion(List<Periode> periodeFormationInclusion) {
         this.periodeFormationInclusion = periodeFormationInclusion;
     }
 
@@ -85,19 +86,19 @@ public class Contrainte implements Serializable {
         this.maxStagiaireEntrepriseEnFormation = maxStagiaireEntrepriseEnFormation;
     }
 
-    public Set<Stagiaire> getStagiairesEntreprise() {
+    public List<Stagiaire> getStagiairesEntreprise() {
         return stagiairesEntreprise;
     }
 
-    public void setStagiairesEntreprise(Set<Stagiaire> stagiairesEntreprise) {
+    public void setStagiairesEntreprise(List<Stagiaire> stagiairesEntreprise) {
         this.stagiairesEntreprise = stagiairesEntreprise;
     }
 
-    public Set<Stagiaire> getStagiairesRecquis() {
+    public List<Stagiaire> getStagiairesRecquis() {
         return stagiairesRecquis;
     }
 
-    public void setStagiairesRecquis(Set<Stagiaire> stagiairesRecquis) {
+    public void setStagiairesRecquis(List<Stagiaire> stagiairesRecquis) {
         this.stagiairesRecquis = stagiairesRecquis;
     }
 /*

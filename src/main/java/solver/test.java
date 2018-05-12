@@ -1,20 +1,8 @@
 package solver;
 
-import jdk.nashorn.internal.objects.NativeArray;
 import models.*;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solution;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.variables.IntVar;
-import solver.ChocoSolver;
-import solver.ChocoSolverListener;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.IntStream;
+import java.util.*;
 
 
 public class test {
@@ -28,11 +16,18 @@ public class test {
 
         ChocoSolver solver = new ChocoSolver(probleme);
         solver.addListener(new ChocoSolverListener() {
+
+
             @Override
-            public void found(Calendrier calendrier) {
-                for (Cours cours: calendrier.getCours()) {
-                    System.out.println(cours.getPeriode().getDebut()+ " " + cours.getPeriode().getFin() + " " + cours.getIdCours());
-                }
+            public void foundCalendar(Calendrier calendrier) {
+
+                calendrier.getCours().forEach(c -> afficheCours(c));
+
+            }
+
+            @Override
+            public void foundCours(Cours cours) {
+                //System.out.println(cours.getPeriode().getDebut()+ " " + cours.getPeriode().getFin() + " " + cours.getIdCours());
             }
 
             @Override
@@ -40,41 +35,31 @@ public class test {
                 System.out.println("Finit");
             }
         });
-        List<Calendrier> calendriers = solver.resoudre3();
+        List<Calendrier> calendriers = solver.resoudre4(5);
 
+        compare (calendriers);
 
-        for (Calendrier calendrier: calendriers) {
-            System.out.println("Calendrier trouve :" );
-            calendrier.getCours().forEach(c -> System.out.printf("Module d'id %s le %s au %s\n",
-                    c.getIdModule(),
-                    c.getPeriode().getDebut(),
-                    c.getPeriode().getFin()));
+    }
+    private static void afficheCours(Cours c) {
+        System.out.printf("Module d'id %s à %d le %s au %s\n",
+                c.getIdModule(),
+                c.getLieu(),
+                c.getPeriode().getDebut(),
+                c.getPeriode().getFin());
+    }
+    private static void compare(List<Calendrier> calendriers) {
+        for (Calendrier calendrier:calendriers) {
+            List <Calendrier> autresCalendriers = new ArrayList<>(calendriers);
+            autresCalendriers.remove(calendrier);
+            autresCalendriers.stream().filter(cal -> cal.getCours().containsAll(calendrier.getCours())).forEach(c -> System.out.println("Doublon trouvé"));
 
         }
-
-        /*int n = 8;
-        Model model = new Model(n + "-queens problem");
-        IntVar[] vars = model.intVarArray("Q", n, 1, n, false);
-        IntVar[] diag1 = IntStream.range(0, n).mapToObj(i -> vars[i].sub(i).intVar()).toArray(IntVar[]::new);
-        IntVar[] diag2 = IntStream.range(0, n).mapToObj(i -> vars[i].add(i).intVar()).toArray(IntVar[]::new);
-        model.post(
-                model.allDifferent(vars),
-                model.allDifferent(diag1),
-                model.allDifferent(diag2)
-        );
-        Solver solver = model.getSolver();
-        solver.showStatistics();
-        solver.setSearch(Search.domOverWDegSearch(vars));
-        Solution solution = solver.findSolution();
-        if (solution != null) {
-            System.out.println(solution.toString());
-        }*/
     }
+
 
     private static Probleme initProblem() {
         Probleme probleme = new Probleme();
-        HashSet<Contrainte> contraintes = new HashSet<Contrainte>();
-        HashSet<Module> modules = new HashSet<Module>();
+        List<Module> modules = new ArrayList<Module>();
 
 
         // SELECT 'Module m' + REPLACE(m.LibelleCourt, '-', '') + ' = new Module (' +  CAST(m.IdModule AS VARCHAR(10) ) +', new HashSet<Module>(), new TreeSet<Cours>());' from module m left join ModuleParUnite mpu on m.IdModule = mpu.IdModule left join UniteParFormation upf on mpu.IdUnite = upf.Id where upf.CodeFormation = '17CDI   '
@@ -332,9 +317,24 @@ public class test {
         modules.add(m17BILAN_FINAL);
 
 
-        probleme.setContraintes(contraintes);
         probleme.setModulesFormation(modules);
-        probleme.setPeriodeFormation(new Periode("2018-01-08 00:00:00", "2019-03-08 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+        probleme.setPeriodeFormation(new Periode("2018-01-02 00:00:00", "2019-03-11 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+        probleme.setContraintes(
+                Arrays.asList(
+                        new Contrainte(
+
+                                Arrays.asList(new Integer(1),new Integer(2), new Integer(12)),
+                                1500,
+                                3000,
+                                20,
+                                Arrays.asList(),
+                                Arrays.asList(),
+                                3,
+                                Arrays.asList(),
+                                Arrays.asList()
+                        )
+                )
+        );
         return probleme;
     }
 

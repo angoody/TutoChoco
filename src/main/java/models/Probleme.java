@@ -1,17 +1,18 @@
 package models;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 public class Probleme implements Serializable {
     private Periode periodeFormation;
-    private Set<Module> modulesFormation;
-    private Set<Contrainte> contraintes;
+    private List<Module> modulesFormation;
+    private List<Contrainte> contraintes;
 
     public Probleme() {
     }
 
-    public Probleme(Periode periodeFormation, Set<Module> modulesFormation, Set<Contrainte> contraintes) {
+    public Probleme(Periode periodeFormation, List<Module> modulesFormation, List<Contrainte> contraintes) {
         this.periodeFormation = periodeFormation;
         this.modulesFormation = modulesFormation;
         this.contraintes = contraintes;
@@ -25,19 +26,19 @@ public class Probleme implements Serializable {
         this.periodeFormation = periodeFormation;
     }
 
-    public Set<Module> getModulesFormation() {
+    public List<Module> getModulesFormation() {
         return modulesFormation;
     }
 
-    public void setModulesFormation(Set<Module> modulesFormation) {
+    public void setModulesFormation(List<Module> modulesFormation) {
         this.modulesFormation = modulesFormation;
     }
 
-    public Set<Contrainte> getContraintes() {
+    public List<Contrainte> getContraintes() {
         return contraintes;
     }
 
-    public void setContraintes(Set<Contrainte> contraintes) {
+    public void setContraintes(List<Contrainte> contraintes) {
         this.contraintes = contraintes;
     }
 }
