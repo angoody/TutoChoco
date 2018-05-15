@@ -12,7 +12,7 @@ public class Periode implements Serializable {
     private String fin = Instant.now().toString();
     private Instant instantDebut = Instant.now();
     private Instant instantFin = Instant.now();
-    private String format ;
+    private String format = "YYYY-MM-dd";
 
     public Instant getInstantDebut() {
         return instantDebut;
