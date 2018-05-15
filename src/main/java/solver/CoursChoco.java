@@ -9,7 +9,6 @@ public class CoursChoco {
     private int debut ;
     private int fin ;
     private Integer idModule;
-    private Integer idCours;
     private int nbSemaine;
     private int nbHeure;
     private int coursIdentifier;
@@ -17,12 +16,11 @@ public class CoursChoco {
 
     private int lieu;
 
-    public CoursChoco(Cours cours, Integer idModule, Integer idCours, Integer nbSemaine, Integer nbHeure) {
+    public CoursChoco(Cours cours, Integer idModule, Integer nbSemaine, Integer nbHeure) {
         this.cours = cours;
         this.debut = DateTimeHelper.InstantToDays(cours.getPeriode().getInstantDebut());
         this.fin = DateTimeHelper.InstantToDays(cours.getPeriode().getInstantFin());
         this.idModule = idModule;
-        this.idCours = idCours;
         this.nbSemaine = nbSemaine;
         this.nbHeure = nbHeure;
         this.coursIdentifier = (this.debut + this.fin) / 2;
@@ -71,6 +69,6 @@ public class CoursChoco {
     }
 
     public int[] getInt() {
-        return new int[] { idModule, idCours, debut, fin, coursIdentifier, duration, nbSemaine, nbHeure, lieu};
+        return new int[] { idModule, debut, fin, coursIdentifier, duration, nbSemaine, nbHeure, lieu};
     }
 }
