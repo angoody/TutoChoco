@@ -58,6 +58,10 @@ public class ModuleChoco {
         return coursIdentifier;
     }
 
+    public int[] getIdModule() {
+        return coursDuModule.values().stream().mapToInt(c -> c.getDebut()).toArray();
+    }
+
 
 
     public Module getModule() {

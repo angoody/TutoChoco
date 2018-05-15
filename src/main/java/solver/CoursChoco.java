@@ -8,7 +8,7 @@ public class CoursChoco {
     private final Cours cours;
     private int debut ;
     private int fin ;
-    private Integer idModule;
+    private int idModule;
     private int nbSemaine;
     private int nbHeure;
     private int coursIdentifier;
@@ -25,7 +25,7 @@ public class CoursChoco {
         this.nbHeure = nbHeure;
         this.coursIdentifier = (this.debut + this.fin) / 2;
         this.duration = cours.getNbHeureReel();
-        this.lieu = lieu;
+        this.lieu = cours.getLieu();
     }
 
     public int getDebut() {
@@ -46,6 +46,10 @@ public class CoursChoco {
 
     public int getLieu() {
         return lieu;
+    }
+
+    public int getIdModule() {
+        return idModule;
     }
 
     public int getNbHeure() {
@@ -69,6 +73,6 @@ public class CoursChoco {
     }
 
     public int[] getInt() {
-        return new int[] { idModule, debut, fin, coursIdentifier, duration, nbSemaine, nbHeure, lieu};
+        return new int[] { idModule, debut, fin, coursIdentifier, lieu};
     }
 }

@@ -4,6 +4,7 @@ import models.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -25,6 +26,7 @@ public class ChocoSolver {
     int nbModules;
     private Model model;
     private Set<ChocoSolverListener> listeners = new HashSet<>();
+    List<ModuleChoco> moduleInChoco;
 
 
     public ChocoSolver(Probleme probleme){
@@ -58,7 +60,8 @@ public class ChocoSolver {
         int finFormation = DateTimeHelper.InstantToDays(probleme.getPeriodeFormation().getInstantFin());
 
         // Transforme les modules en objet préparé pour Choco
-        List<ModuleChoco> moduleInChoco = probleme.getModulesFormation().stream().map(m -> new ModuleChoco(m, probleme.getContraintes(), probleme.getPeriodeFormation())).collect(Collectors.toList());
+
+        moduleInChoco = probleme.getModulesFormation().stream().map(m -> new ModuleChoco(m, probleme.getContraintes(), probleme.getPeriodeFormation())).collect(Collectors.toList());
 
         new ArrayList<>();
 
@@ -76,18 +79,28 @@ public class ChocoSolver {
                 .collect(Collectors.groupingBy( e->e, Collectors.counting())).entrySet().stream()
                 .filter(c -> c.getValue() >= nbMaxStagiaireEntreprise ).map(c -> c.getKey()).collect(Collectors.toSet());
 
-
-        IntVar[] coursIdentifier = IntStream
-                .range(0, nbModules)
-                .mapToObj(i ->
-                        model.intVar(
-                                "Module " + moduleInChoco.get(i).getId(),
-                                moduleInChoco.get(i).getCoursIdentifier()))
-                .toArray(IntVar[]::new);
-
         // pour chaque module 'i'
 
-        IntVar[] cours = moduleInChoco.stream().flatMap(m -> m.getCoursDuModule().stream().map(c ->  model.intVar(c.getCours().getIdCours(),c.getInt()))).toArray(IntVar[]::new);
+        /*int[][] cours = {
+                moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getDebut()).boxed()).mapToInt(i -> i).toArray(),
+                moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getFin()).boxed()).mapToInt(i -> i).toArray(),
+                moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getLieu()).boxed()).mapToInt(i -> i).toArray(),
+                moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getCoursIdentifier()).boxed()).mapToInt(i -> i).toArray(),
+                moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getIdModule()).boxed()).mapToInt(i -> i).toArray()
+        };*/
+        int nbCours = moduleInChoco.stream().flatMap(m -> m.getCoursDuModule().stream()).toArray().length;
+        int[][] cours = new int[nbCours][5];
+
+        int z = 0;
+        for (int i=0; i < nbModules; i++ )
+        {
+            for (int j=0; j < moduleInChoco.get(i).getCoursDuModule().size(); j++)
+            {
+                cours[z] = moduleInChoco.get(i).getCoursDuModule().get(j).getInt();
+                z++;
+            }
+
+        }
 
 
         IntVar[] modulesDebut = IntStream
@@ -97,6 +110,18 @@ public class ChocoSolver {
                                 "Debut " + moduleInChoco.get(i).getId(),
                                 moduleInChoco.get(i).getDebut()))
                 .toArray(IntVar[]::new);
+        IntVar tousLesDebut = model.intVar("Tous les debut", moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getDebut()).boxed()).mapToInt(i -> i).toArray());
+
+
+        IntVar[] coursIdentifier = IntStream
+                .range(0, nbModules)
+                .mapToObj(i ->
+                        model.intVar(
+                                "Module " + moduleInChoco.get(i).getId(),
+                                moduleInChoco.get(i).getCoursIdentifier()))
+                .toArray(IntVar[]::new);
+        IntVar tousLesIdentifiants = model.intVar("Tous les identifiants", moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getCoursIdentifier()).boxed()).mapToInt(i -> i).toArray());
+
 
         IntVar[] modulesFin = IntStream
                 .range(0, nbModules)
@@ -105,6 +130,7 @@ public class ChocoSolver {
                                 "Fin " + moduleInChoco.get(i).getId(),
                                 moduleInChoco.get(i).getFin()))
                 .toArray(IntVar[]::new);
+        IntVar toutesLesFin = model.intVar("Toutes les fins", moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getFin()).boxed()).mapToInt(i -> i).toArray());
 
         IntVar[] modulesLieu = IntStream
                 .range(0, nbModules)
@@ -113,6 +139,7 @@ public class ChocoSolver {
                                 "Fin " + moduleInChoco.get(i).getId(),
                                 moduleInChoco.get(i).getLieu()))
                 .toArray(IntVar[]::new);
+        IntVar tousLesLieux = model.intVar("Tous les lieux", moduleInChoco.stream().flatMap(m -> Arrays.stream(m.getLieu()).boxed()).mapToInt(i -> i).toArray());
 
         IntVar[] modulesID = IntStream
                 .range(0, nbModules)
@@ -121,10 +148,10 @@ public class ChocoSolver {
                                 "ID module " + moduleInChoco.get(i).getId(),
                                 moduleInChoco.get(i).getId()))
                 .toArray(IntVar[]::new);
+        IntVar tousLesIdModule = model.intVar("Tous les modules", moduleInChoco.stream().mapToInt(m -> m.getId()).toArray());
 
-        IntVar lieuxAutorise = model.intVar(
-                            "Lieu autorise",
-                            listLieuxAutorises.stream().distinct().mapToInt(e -> e).toArray());
+
+        int[] lieuxAutorise = listLieuxAutorises.stream().mapToInt(e -> e).toArray();
 
         //IntVar tot_dev = model.intVar("tot_dev", 0, IntVar.MAX_INT_BOUND);
         // Constraint posting
@@ -133,10 +160,27 @@ public class ChocoSolver {
         //model.allDifferent(modulesFin).post();
 
         // Permet de restreindre la recherche à des cours avec des périodes différentes pour chaque module
-        model.allDifferent(coursIdentifier).post();
-        model.table(cours , new Tuples(true)).post();
+        //model.allDifferent(tousLesIdModule).post();
+        //model.allDifferent(coursIdentifier).post();
+
+
+        /*IntVar[] table = { tousLesIdModule, tousLesDebut, toutesLesFin, tousLesIdentifiants, tousLesLieux};
+        tousLesLieux.eq(lieuxAutorise).post();
+        Tuples tuple = new Tuples(cours, true);
+        model.table(table, tuple ).post();*/
         // pour chaque module 'i'
+        IntVar[][] table = new IntVar[nbModules][];
+        Tuples tuple = new Tuples(cours, true);
+
         for (int i = 0; i < nbModules; i++) {
+
+            // table ave les enregistrements autorisées
+            table[i] = new IntVar[] { modulesID[i], modulesDebut[i], modulesFin[i], coursIdentifier[i], modulesLieu[i]};
+            model.table(table[i], tuple ).post();
+
+            int finalI = i;
+            Constraint[] contraintesDeLieux = IntStream.range(0, lieuxAutorise.length).mapToObj(a -> model.arithm(modulesLieu[finalI], "=", lieuxAutorise[a])).toArray(Constraint[]::new);
+            model.or(contraintesDeLieux).post();
 
 
             /*modulesDebut[i].eq(cours).post();
@@ -145,8 +189,8 @@ public class ChocoSolver {
             modulesID[i].eq(cours).post();*/
 
             // permet de lié les débuts et les fins aux modulesPeriode
-            modulesDebut[i].le(coursIdentifier[i]).post();
-            modulesFin[i].ge(coursIdentifier[i]).post();
+            /*modulesDebut[i].le(coursIdentifier[i]).post();
+            modulesFin[i].ge(coursIdentifier[i]).post();*/
 
             // Début et fin de la formation
             modulesDebut[i].ge(debutFormation).post();
@@ -160,11 +204,10 @@ public class ChocoSolver {
             // Cette contraintes évite les chevauchements
             for (int j = i + 1; j < nbModules; j++) {
                 model.or(
-                        model.arithm(modulesFin[i], "<", modulesDebut[j]),
-                        model.arithm(modulesFin[j], "<", modulesDebut[i])
+                        model.arithm(modulesFin[i], "<=", modulesDebut[j]),
+                        model.arithm(modulesFin[j], "<=", modulesDebut[i])
                 ).post();
             }
-            int finalI = i;
 
             //probleme.getContraintes().forEach(contrainte -> contrainte.getIdLieux().forEach(lieux -> modulesLieu[finalI].(lieux).post() ));
         }
@@ -183,7 +226,7 @@ public class ChocoSolver {
             for (int i = 0; i < nbModules; i++) {
                 //System.out.println("modulesPeriode " + modulesPeriode[i].getName() + " Value = " + modulesPeriode[i].getValue() + " " + moduleInChoco.get(i).getCoursByPeriodIdentifier( modulesPeriode[i].getValue()).getPeriode().getDebut() + " au " + moduleInChoco.get(i).getCoursByPeriodIdentifier( modulesPeriode[i].getValue()).getPeriode().getFin()  );
                 //System.out.println("modulesDebut " + modulesDebut[i].getName() + " Value = " + modulesDebut[i].getValue() + " " + DateTimeHelper.DaysToInstant(modulesDebut[i].getValue()) );
-                Cours leCoursChoisi = moduleInChoco.get(i).getCoursByPeriodIdentifier(coursIdentifier[i].getValue());
+                Cours leCoursChoisi = rechercheCours(modulesID[i], modulesDebut[i], modulesFin[i], coursIdentifier[i], modulesLieu[i]);
                 lesCoursChoisi.add(leCoursChoisi);
                 listeners.forEach(l -> l.foundCours(leCoursChoisi));
             }
@@ -193,7 +236,7 @@ public class ChocoSolver {
         });
 
         // Si aucune solution n'est trouvée, permet de savoir pourquoi
-        //solver.showContradiction();
+        solver.showContradiction();
 
         // Lorsqu'une solution est trouvé, permet de comprendre le cheminement
         solver.showDecisions();
@@ -228,6 +271,21 @@ public class ChocoSolver {
         }*/
         return calendriersTrouve;
 
+    }
+
+    private Cours rechercheCours(IntVar idModule, IntVar debut, IntVar fin, IntVar periodeIdentifier, IntVar lieux) {
+        for (ModuleChoco module:moduleInChoco) {
+            if (module.getId() == idModule.getValue()){
+                for (CoursChoco cours: module.getCoursDuModule()) {
+                    if (cours.getDebut() == debut.getValue() && cours.getFin() == fin.getValue() && cours.getCoursIdentifier() == periodeIdentifier.getValue() && cours.getLieu() == lieux.getValue())
+                    {
+                        return cours.getCours();
+                    }
+                }
+
+            }
+        }
+        return null;
     }
 
     public List<Calendrier> resoudre4 (int nbCalendrier) {
