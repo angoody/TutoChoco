@@ -5,7 +5,6 @@ import models.Cours;
 import models.Module;
 import models.Periode;
 import org.chocosolver.solver.variables.IntVar;
-import solver2.CoursChoco;
 import utils.DateTimeHelper;
 
 import java.util.*;
