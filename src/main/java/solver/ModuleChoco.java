@@ -7,10 +7,7 @@ import models.Periode;
 import org.chocosolver.solver.variables.IntVar;
 import utils.DateTimeHelper;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModuleChoco {
@@ -18,69 +15,53 @@ public class ModuleChoco {
     private Module module;
     private IntVar moduleInChoco;
     private int id;
-    private int[][] periode ;
     private int[] debut ;
     private int[] fin ;
     private int[] coursIdentifier;
-    private int[] durationIdentifier;
 
     private int[] lieu;
 
     private int[] duration;
-    private List<Cours> coursDuModule;
-
+    private Map<String, CoursChoco> coursDuModule;
 
     public ModuleChoco(Module module, List<Contrainte> contraintes, Periode periodeFormation) {
 
         // Initialisation des variables
         this.module = module;
         this.id = module.getIdModule();
-        int nbCours = module.getCours().size();
-        periode = new int[nbCours][2];
-        lieu = new int[nbCours];
-        duration = new int[nbCours];
-        coursIdentifier = new int[nbCours];
-        durationIdentifier = new int[nbCours];
 
-        coursDuModule = module.getCours().stream()
-                .sorted(Comparator.comparing(o -> o.getPeriode().getInstantDebut()))
-                .collect(Collectors.toList());
+        List<Cours> lesCours = module.getCours().stream()
+                .sorted(Comparator.comparing(o -> o.getPeriode().getInstantDebut())).collect(Collectors.toList());
 
-        debut = coursDuModule.stream().mapToInt(c -> DateTimeHelper.InstantToDays(c.getPeriode().getInstantDebut())).toArray();
-        fin = coursDuModule.stream().mapToInt(c -> DateTimeHelper.InstantToDays(c.getPeriode().getInstantFin())).toArray();
-        lieu = coursDuModule.stream().mapToInt(c -> c.getLieu()).toArray();
+        coursDuModule = lesCours.stream().collect(
+                Collectors.toMap(
+                        c -> c.getIdCours(),
+                        c -> new CoursChoco(c, id, module.getNbSemainePrevu(), module.getNbHeurePrevu()) ));
 
-        for (int i = 0; i < coursDuModule.size(); i++)
-        {
-            periode[i][0] = DateTimeHelper.InstantToDays(coursDuModule.get(i).getPeriode().getInstantDebut());
-            periode[i][1] = DateTimeHelper.InstantToDays(coursDuModule.get(i).getPeriode().getInstantFin());
-            duration[i] = periode[i][1] - periode[i][0];
-            // Permet à Choco de comparer les cours simplement avec la duration / 2
-            coursIdentifier[i] = (periode[i][1] + periode[i][0]) / 2;
-            durationIdentifier[i] = (periode[i][1] - periode[i][0]) / 2;
-        }
 
-        /*range(0,module.getCours().size())
-                .mapToObj(i -> {DateTimeHelper.InstantToDays(coursDuModule.get(i).getPeriode().getInstantDebut()),
-                DateTimeHelper.InstantToDays(coursDuModule.get(i).getPeriode().getInstantFin())}).toArray();
-        //new int[module.getCours().size()][2];
-        module.getCours().forEach(cours1 -> periode +=
-                {DateTimeHelper.InstantToDays(cours1.getPeriode().getInstantDebut()),
-                DateTimeHelper.InstantToDays(cours1.getPeriode().getInstantFin())});*/
+        debut = coursDuModule.values().stream().mapToInt(c -> c.getDebut()).toArray();
+        fin = coursDuModule.values().stream().mapToInt(c -> c.getFin()).toArray();
+        lieu = coursDuModule.values().stream().mapToInt(c -> c.getLieu()).toArray();
+        duration = coursDuModule.values().stream().mapToInt(c -> c.getDuration()).toArray();
+        coursIdentifier = coursDuModule.values().stream().mapToInt(c -> c.getCoursIdentifier()).toArray();
+
+
+
     }
 
 
-    public List<Cours> getCoursDuModule() {
-        return coursDuModule;
+    public List<CoursChoco> getCoursDuModule() {
+        return coursDuModule.values().stream().collect(Collectors.toList());
     }
 
     public int[] getCoursIdentifier() {
         return coursIdentifier;
     }
 
-    public int[] getDurationIdentifier() {
-        return durationIdentifier;
+    public int[] getIdModule() {
+        return coursDuModule.values().stream().mapToInt(c -> c.getDebut()).toArray();
     }
+
 
 
     public Module getModule() {
@@ -95,9 +76,6 @@ public class ModuleChoco {
         this.id = id;
     }
 
-    public int[][] getPeriode() {
-        return periode;
-    }
 
     public int[] getLieu() {
         return lieu;
@@ -117,22 +95,17 @@ public class ModuleChoco {
 
 
 
+    public Cours getCoursId(String id) {
+
+        return coursDuModule.get(id).getCours();
+    }
+
     public Cours getCoursByPeriodIdentifier(int value) {
-        for (int i = 0; i < coursDuModule.size(); i++)
-        {
-            if (coursIdentifier[i] == value)
-            {
-                return coursDuModule.get(i);
-            }
-        }
-        return null;
+
+        final CoursChoco[] coursARetourner = new CoursChoco[1];
+        coursDuModule.values().stream().filter(v -> v.getCoursIdentifier() == value).forEach(c-> coursARetourner[0] = c);
+        return coursARetourner[0].getCours();
     }
 
-    public IntVar getModuleInChoco() {
-        return moduleInChoco;
-    }
 
-    public void setModuleInChoco(IntVar moduleInChoco) {
-        this.moduleInChoco = moduleInChoco;
-    }
 }
