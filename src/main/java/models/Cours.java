@@ -7,15 +7,17 @@ public class Cours implements Serializable, Comparable<Cours> {
     private String idCours;
     private Integer idModule;
     private Integer lieu;
+    private Integer nbHeureReel;
 
     public Cours() {
     }
 
-    public Cours(Periode periode, String idCours, Integer idModule, Integer lieu) {
+    public Cours(Periode periode, String idCours, Integer idModule, Integer lieu, Integer nbHeureReel) {
         this.periode = periode;
         this.idCours = idCours;
         this.idModule = idModule;
         this.lieu = lieu;
+        this.nbHeureReel = nbHeureReel;
     }
 
     public Periode getPeriode() {
@@ -53,6 +55,14 @@ public class Cours implements Serializable, Comparable<Cours> {
     @Override
     public int compareTo(Cours o) {
         return o.getPeriode().getInstantDebut().compareTo(this.getPeriode().getInstantDebut());
+    }
+
+    public Integer getNbHeureReel() {
+        return nbHeureReel;
+    }
+
+    public void setNbHeureReel(Integer nbHeureReel) {
+        this.nbHeureReel = nbHeureReel;
     }
 
     //  private Salle codeSalle;

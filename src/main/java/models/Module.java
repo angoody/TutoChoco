@@ -8,14 +8,18 @@ public class Module implements Serializable {
     private Integer idModule;
     private Set<Module> prerequis;
     private Set<Cours> cours;
+    private Integer nbSemainePrevu;
+    private Integer nbHeurePrevu;
 
     public Module() {
     }
 
-    public Module(Integer idModule, Set<Module> prerequis, Set<Cours> cours) {
+    public Module(Integer idModule, Set<Module> prerequis, Set<Cours> cours, Integer nbSemainePrevu, Integer nbHeurePrevu) {
         this.idModule = idModule;
         this.prerequis = prerequis;
         this.cours = cours;
+        this.nbSemainePrevu = nbSemainePrevu;
+        this.nbHeurePrevu = nbHeurePrevu;
     }
 
     public Integer getIdModule() {
@@ -40,6 +44,22 @@ public class Module implements Serializable {
 
     public void setCours(Set<Cours> cours) {
         this.cours = cours;
+    }
+
+    public Integer getNbSemainePrevu() {
+        return nbSemainePrevu;
+    }
+
+    public void setNbSemainePrevu(Integer nbSemainePrevu) {
+        this.nbSemainePrevu = nbSemainePrevu;
+    }
+
+    public Integer getNbHeurePrevu() {
+        return nbHeurePrevu;
+    }
+
+    public void setNbHeurePrevu(Integer nbHeurePrevu) {
+        this.nbHeurePrevu = nbHeurePrevu;
     }
 
     /*libelle: String,
